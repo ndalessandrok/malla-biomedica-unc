@@ -1006,11 +1006,26 @@
                            min="1" 
                            max="10" 
                            step="0.1"
-                           onchange="updateGrade('${subjectId}', this.value)">
+                           onchange="updateGrade('${subjectId}', this.value)"
+                           oninput="updateGrade('${subjectId}', this.value)">
                 </div>` : 
-                `<div><strong>Estado:</strong> ${
-                    subject.status === 'available' ? 'Disponible para cursar' : 'Bloqueada'
-                }</div>`;
+                subject.status === 'available' ?
+                `<div><strong>Estado:</strong> Disponible para cursar
+                    <br><strong>Nota:</strong> 
+                    <input type="number" 
+                           class="grade-input" 
+                           value="${subject.grade || ''}" 
+                           min="1" 
+                           max="10" 
+                           step="0.1"
+                           placeholder="Ingresa nota"
+                           onchange="updateGrade('${subjectId}', this.value)"
+                           oninput="updateGrade('${subjectId}', this.value)">
+                    <small style="display: block; margin-top: 0.25rem; color: var(--secondary-color);">
+                        Nota ≥ 4 marca la materia como aprobada
+                    </small>
+                </div>` :
+                `<div><strong>Estado:</strong> Bloqueada</div>`;
             
             document.getElementById('modalGrade').innerHTML = gradeHtml;
             
@@ -1037,10 +1052,20 @@
 
         function updateGrade(subjectId, grade) {
             const numGrade = parseFloat(grade);
-            if (numGrade >= 1 && numGrade <= 10) {
+            if (!isNaN(numGrade) && numGrade >= 1 && numGrade <= 10) {
                 subjects[subjectId].grade = numGrade;
-                if (numGrade >= 4 && subjects[subjectId].status !== 'completed') {
+                if (numGrade >= 4) {
                     subjects[subjectId].status = 'completed';
+                    updateSubjectStatus();
+                    renderSemesters();
+                }
+                calculateStats();
+                saveData();
+            } else if (grade === '' || grade === null) {
+                // Permitir borrar la nota
+                subjects[subjectId].grade = null;
+                if (subjects[subjectId].status === 'completed') {
+                    subjects[subjectId].status = 'available';
                     updateSubjectStatus();
                     renderSemesters();
                 }
@@ -1166,16 +1191,22 @@
             if (e.target.closest('.subject')) {
                 e.preventDefault();
                 const subjectElement = e.target.closest('.subject');
-                const subjectId = Object.keys(subjects).find(id => 
-                    subjectElement.innerHTML.includes(subjects[id].code)
-                );
-                if (subjectId) {
-                    toggleSubjectStatus(subjectId);
+                // Buscar el ID de la materia por el código en el contenido
+                const codeElement = subjectElement.querySelector('.subject-code');
+                if (codeElement) {
+                    const code = codeElement.textContent;
+                    const subjectId = Object.keys(subjects).find(id => 
+                        subjects[id].code === code
+                    );
+                    if (subjectId && subjects[subjectId].status !== 'locked') {
+                        toggleSubjectStatus(subjectId);
+                    }
                 }
             }
         });
     </script>
 </body>
+</html>
 </html>
 </body>
 </html>
