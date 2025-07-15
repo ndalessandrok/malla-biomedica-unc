@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malla Interactiva - Ingeniería Biomédica UNC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 150px;
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .semester {
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #3498db;
+        }
+
+        .semester h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .semester-icon {
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .subjects {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .subject {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .subject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .subject.completed {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border-color: #27ae60;
+        }
+
+        .subject.available {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            border-color: #e67e22;
+        }
+
+        .subject.locked {
+            background: #ecf0f1;
+            color: #95a5a6;
+            border-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .subject-code {
+            font-size: 0.8em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .subject-name {
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .subject-credits {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .subject-grade {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+        }
+
+        .legend-color.completed {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .legend-color.available {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .legend-color.locked {
+            background: #ecf0f1;
+            border: 1px solid #bdc3c7;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2ecc71;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+
+            .subjects {
+                grid-template-columns: 1fr;
+            }
+
+            .status-legend {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Malla Interactiva</h1>
+            <p>Ingeniería Biomédica - Universidad Nacional de Córdoba</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="completed-count">0</h3>
+                <p>Materias Aprobadas</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="available-count">0</h3>
+                <p>Disponibles</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="total-count">0</h3>
+                <p>Total de Materias</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="credits-count">0</h3>
+                <p>Créditos Obtenidos</p>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill">0%</div>
+        </div>
+
+        <div class="status-legend">
+            <div class="legend-item">
+                <div class="legend-color completed"></div>
+                <span>Aprobada</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color available"></div>
+                <span>Disponible</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color locked"></div>
+                <span>Bloqueada</span>
+            </div>
+        </div>
+
+        <div id="semesters-container"></div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Datos de las materias con sus correlatividades
+        const subjects = {
+            // Nivelación
+            'ambientacion': {
+                name: 'Ambientación Universitaria',
+                code: '10-04050',
+                credits: 1,
+                semester: 'Nivelación',
+                prerequisites: [],
+                completed: true,
+                grade: 'A'
+            },
+            'matematica': {
+                name: 'Matemática',
+                code: '10-04051',
+                credits: 3,
+                semester: 'Nivelación',
+                prerequisites: [],
+                completed: true,
+                grade: 'A'
+            },
+            'fisica_quimica': {
+                name: 'Física y Química',
+                code: '10-04052',
+                credits: 3,
+                semester: 'Nivelación',
+                prerequisites: [],
+                completed: true,
+                grade: 'A'
+            },
+            
+            // 1er Cuatrimestre
+            'analisis1': {
+                name: 'Análisis Matemático 1',
+                code: '10-04053',
+                credits: 7,
+                semester: '1° Cuatrimestre',
+                prerequisites: ['matematica'],
+                completed: true,
+                grade: '9'
+            },
+            'quimica': {
+                name: 'Química',
+                code: '10-04057',
+                credits: 5,
+                semester: '1° Cuatrimestre',
+                prerequisites: ['fisica_quimica'],
+                completed: true,
+                grade: '7'
+            },
+            'taller_lab': {
+                name: 'Taller y Laboratorio',
+                code: '10-04058',
+                credits: 6,
+                semester: '1° Cuatrimestre',
+                prerequisites: [],
+                completed: true,
+                grade: '6.5'
+            },
+            
+            // 2do Cuatrimestre
+            'algebra': {
+                name: 'Álgebra Lineal',
+                code: '10-04059',
+                credits: 7,
+                semester: '2° Cuatrimestre',
+                prerequisites: ['analisis1'],
+                completed: true,
+                grade: '7'
+            },
+            'fisica1': {
+                name: 'Física 1',
+                code: '10-04060',
+                credits: 7,
+                semester: '2° Cuatrimestre',
+                prerequisites: ['fisica_quimica', 'analisis1'],
+                completed: true,
+                grade: '8'
+            },
+            'quimica_organica': {
+                name: 'Química Orgánica y Biológica',
+                code: '10-09200',
+                credits: 5,
+                semester: '2° Cuatrimestre',
+                prerequisites: ['quimica'],
+                completed: true,
+                grade: '7'
+            },
+            'sistemas_repr': {
+                name: 'Sistemas de Representación',
+                code: '10-04055',
+                credits: 7,
+                semester: '2° Cuatrimestre',
+                prerequisites: ['taller_lab'],
+                completed: false,
+                grade: null
+            },
+            
+            // 3er Cuatrimestre
+            'analisis2': {
+                name: 'Análisis Matemático 2',
+                code: '10-04063',
+                credits: 7,
+                semester: '3° Cuatrimestre',
+                prerequisites: ['algebra'],
+                completed: true,
+                grade: '5'
+            },
+            'anatomia': {
+                name: 'Anatomía para Ingenieros',
+                code: '10-09201',
+                credits: 4,
+                semester: '3° Cuatrimestre',
+                prerequisites: ['quimica_organica'],
+                completed: false,
+                grade: null
+            },
+            'estatica': {
+                name: 'Estática y Resistencia de los Materiales',
+                code: '10-09202',
+                credits: 6,
+                semester: '3° Cuatrimestre',
+                prerequisites: ['fisica1', 'sistemas_repr'],
+                completed: false,
+                grade: null
+            },
+            'fisica2': {
+                name: 'Física 2',
+                code: '10-04067',
+                credits: 7,
+                semester: '3° Cuatrimestre',
+                prerequisites: ['fisica1', 'analisis2'],
+                completed: false,
+                grade: null
+            },
+            'ingles': {
+                name: 'Módulo de Inglés',
+                code: '10-04066',
+                credits: 3,
+                semester: '3° Cuatrimestre',
+                prerequisites: [],
+                completed: true,
+                grade: '8'
+            },
+            
+            // 4to Cuatrimestre
+            'analisis3': {
+                name: 'Análisis Matemático 3',
+                code: '10-04070',
+                credits: 7,
+                semester: '4° Cuatrimestre',
+                prerequisites: ['analisis2'],
+                completed: true,
+                grade: '7'
+            },
+            'electronica': {
+                name: 'Electrónica',
+                code: '10-04074',
+                credits: 6,
+                semester: '4° Cuatrimestre',
+                prerequisites: ['fisica2'],
+                completed: false,
+                grade: null
+            },
+            'histologia': {
+                name: 'Histología para Ingenieros',
+                code: '10-09203',
+                credits: 4,
+                semester: '4° Cuatrimestre',
+                prerequisites: ['anatomia'],
+                completed: true,
+                grade: '5'
+            },
+            'informatica': {
+                name: 'Informática y Cálculo Numérico',
+                code: '10-04061',
+                credits: 8,
+                semester: '4° Cuatrimestre',
+                prerequisites: ['algebra'],
+                completed: true,
+                grade: '8'
+            },
+            'probabilidad': {
+                name: 'Probabilidad y Estadística',
+                code: '10-04062',
+                credits: 5,
+                semester: '4° Cuatrimestre',
+                prerequisites: ['analisis2'],
+                completed: false,
+                grade: null
+            },
+            
+            // 5to Cuatrimestre
+            'electronica_digital1': {
+                name: 'Electrónica Digital 1',
+                code: '10-04068',
+                credits: 8,
+                semester: '5° Cuatrimestre',
+                prerequisites: ['electronica'],
+                completed: false,
+                grade: null
+            },
+            'electrotecnia': {
+                name: 'Electrotecnia General y Máquinas Eléctricas',
+                code: '10-09204',
+                credits: 8,
+                semester: '5° Cuatrimestre',
+                prerequisites: ['fisica2'],
+                completed: false,
+                grade: null
+            },
+            'fisiologia': {
+                name: 'Fisiología Humana',
+                code: '10-09205',
+                credits: 4,
+                semester: '5° Cuatrimestre',
+                prerequisites: ['histologia'],
+                completed: false,
+                grade: null
+            },
+            'senales': {
+                name: 'Señales y Sistemas',
+                code: '10-04076',
+                credits: 8,
+                semester: '5° Cuatrimestre',
+                prerequisites: ['analisis3'],
+                completed: false,
+                grade: null
+            },
+            
+            // 6to Cuatrimestre
+            'biomateriales': {
+                name: 'Biomateriales',
+                code: '10-09206',
+                credits: 6,
+                semester: '6° Cuatrimestre',
+                prerequisites: ['quimica_organica', 'estatica'],
+                completed: false,
+                grade: null
+            },
+            'electronica_digital2': {
+                name: 'Electrónica Digital 2',
+                code: '10-04071',
+                credits: 8,
+                semester: '6° Cuatrimestre',
+                prerequisites: ['electronica_digital1'],
+                completed: false,
+                grade: null
+            },
+            'fisica_biomedica': {
+                name: 'Física Biomédica',
+                code: '10-09207',
+                credits: 4,
+                semester: '6° Cuatrimestre',
+                prerequisites: ['fisica2'],
+                completed: false,
+                grade: null
+            },
+            'ing_economica': {
+                name: 'Ingeniería Económica y Legal',
+                code: '10-04064',
+                credits: 6,
+                semester: '6° Cuatrimestre',
+                prerequisites: ['probabilidad'],
+                completed: false,
+                grade: null
+            },
+            'redes_control': {
+                name: 'Teoría de Redes y Control',
+                code: '10-09208',
+                credits: 6,
+                semester: '6° Cuatrimestre',
+                prerequisites: ['senales'],
+                completed: false,
+                grade: null
+            },
+            
+            // 7mo Cuatrimestre
+            'electronica_analogica': {
+                name: 'Electrónica Analógica',
+                code: '10-09209',
+                credits: 6,
+                semester: '7° Cuatrimestre',
+                prerequisites: ['electronica'],
+                completed: false,
+                grade: null
+            },
+            'fisiopatologia': {
+                name: 'Fisiopatología',
+                code: '10-09210',
+                credits: 4,
+                semester: '7° Cuatrimestre',
+                prerequisites: ['fisiologia'],
+                completed: false,
+                grade: null
+            },
+            'instalaciones': {
+                name: 'Instalaciones Hospitalarias',
+                code: '10-09211',
+                credits: 10,
+                semester: '7° Cuatrimestre',
+                prerequisites: ['electrotecnia'],
+                completed: false,
+                grade: null
+            },
+            'procesamiento': {
+                name: 'Procesamiento de Señales',
+                code: '10-09212',
+                credits: 6,
+                semester: '7° Cuatrimestre',
+                prerequisites: ['senales'],
+                completed: false,
+                grade: null
+            },
+            'transductores': {
+                name: 'Transductores y Sensores',
+                code: '10-09213',
+                credits: 8,
+                semester: '7° Cuatrimestre',
+                prerequisites: ['electronica_analogica'],
+                completed: false,
+                grade: null
+            },
+            
+            // 8vo Cuatrimestre
+            'biomecanica': {
+                name: 'Biomecánica',
+                code: '10-09214',
+                credits: 6,
+                semester: '8° Cuatrimestre',
+                prerequisites: ['estatica', 'fisiologia'],
+                completed: false,
+                grade: null
+            },
+            'imagenes': {
+                name: 'Imágenes en Medicina',
+                code: '10-09215',
+                credits: 7,
+                semester: '8° Cuatrimestre',
+                prerequisites: ['fisica_biomedica', 'procesamiento'],
+                completed: false,
+                grade: null
+            },
+            'instrumentacion': {
+                name: 'Instrumentación Biomédica',
+                code: '10-09216',
+                credits: 10,
+                semester: '8° Cuatrimestre',
+                prerequisites: ['transductores'],
+                completed: false,
+                grade: null
+            },
+            'practica': {
+                name: 'Práctica Profesional Supervisada',
+                code: '10-09217',
+                credits: 10,
+                semester: '8° Cuatrimestre',
+                prerequisites: ['instalaciones'],
+                completed: false,
+                grade: null
+            },
+            
+            // 9no Cuatrimestre
+            'rehabilitacion': {
+                name: 'Ingeniería en Rehabilitación',
+                code: '10-09218',
+                credits: 7,
+                semester: '9° Cuatrimestre',
+                prerequisites: ['biomecanica'],
+                completed: false,
+                grade: null
+            },
+            'hospitalaria': {
+                name: 'Ingeniería Hospitalaria',
+                code: '10-09219',
+                credits: 7,
+                semester: '9° Cuatrimestre',
+                prerequisites: ['instalaciones'],
+                completed: false,
+                grade: null
+            },
+            'modelos': {
+                name: 'Modelos y Simulaciones',
+                code: '10-09220',
+                credits: 7,
+                semester: '9° Cuatrimestre',
+                prerequisites: ['informatica', 'redes_control'],
+                completed: false,
+                grade: null
+            },
+            'radiaciones': {
+                name: 'Radiaciones Ionizantes en Medicina',
+                code: '10-09222',
+                credits: 7,
+                semester: '9° Cuatrimestre',
+                prerequisites: ['fisica_biomedica'],
+                completed: false,
+                grade: null
+            },
+            
+            // 10mo Cuatrimestre
+            'higiene': {
+                name: 'Higiene y Seguridad',
+                code: '10-04078',
+                credits: 7,
+                semester: '10° Cuatrimestre',
+                prerequisites: ['ing_economica'],
+                completed: false,
+                grade: null
+            },
+            'normalizacion': {
+                name: 'Seguridad y Normalización Biomédica',
+                code: '10-09223',
+                credits: 7,
+                semester: '10° Cuatrimestre',
+                prerequisites: ['instrumentacion'],
+                completed: false,
+                grade: null
+            },
+            'proyecto': {
+                name: 'Proyecto Integrador',
+                code: '10-09225',
+                credits: 13,
+                semester: '10° Cuatrimestre',
+                prerequisites: ['practica'],
+                completed: false,
+                grade: null
+            }
+        };
+
+        // Ordenar por cuatrimestre
+        const semesterOrder = [
+            'Nivelación',
+            '1° Cuatrimestre',
+            '2° Cuatrimestre',
+            '3° Cuatrimestre',
+            '4° Cuatrimestre',
+            '5° Cuatrimestre',
+            '6° Cuatrimestre',
+            '7° Cuatrimestre',
+            '8° Cuatrimestre',
+            '9° Cuatrimestre',
+            '10° Cuatrimestre'
+        ];
+
+        function checkPrerequisites(subject) {
+            if (!subject.prerequisites || subject.prerequisites.length === 0) {
+                return true;
+            }
+            
+            return subject.prerequisites.every(prereq => {
+                const prereqSubject = subjects[prereq];
+                return prereqSubject && prereqSubject.completed;
+            });
+        }
+
+        function getSubjectStatus(subject) {
+            if (subject.completed) {
+                return 'completed';
+            }
+            
+            if (checkPrerequisites(subject)) {
+                return 'available';
+            }
+            
+            return 'locked';
+        }
+
+        function toggleSubject(subjectId) {
+            const subject = subjects[subjectId];
+            if (!subject) return;
+
+            const currentStatus = getSubjectStatus(subject);
+            
+            if (currentStatus === 'locked') {
+                showNotification('⚠️ Esta materia no está disponible. Completa las correlativas primero.');
+                return;
+            }
+
+            // Toggle completion status
+            subject.completed = !subject.completed;
+            
+            if (subject.completed) {
+                // Prompt for grade
+                const grade = prompt('Ingresa tu nota (opcional):');
+                if (grade) {
+                    subject.grade = grade;
+                }
+                
+                // Check for newly available subjects
+                const newlyAvailable = [];
+                Object.keys(subjects).forEach(id => {
+                    const s = subjects[id];
+                    if (!s.completed && checkPrerequisites(s)) {
+                        if (s.prerequisites.includes(subjectId)) {
+                            newlyAvailable.push(s.name);
+                        }
+                    }
+                });
+                
+                if (newlyAvailable.length > 0) {
+                    showNotification(`🎉 ¡Nuevas materias disponibles! ${newlyAvailable.join(', ')}`);
+                } else {
+                    showNotification('✅ Materia completada');
+                }
+            } else {
+                subject.grade = null;
+                showNotification('❌ Materia desmarcada');
+            }
+            
+            renderMalla();
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function renderMalla() {
+            const container = document.getElementById('semesters-container');
+            container.innerHTML = '';
+
+            // Group subjects by semester
+            const subjectsBySemester = {};
+            Object.keys(subjects).forEach(id => {
+                const subject = subjects[id];
+                if (!subjectsBySemester[subject.semester]) {
+                    subjectsBySemester[subject.semester] = [];
+                }
+                subjectsBySemester[subject.semester].push({ id, ...subject });
+            });
+
+            // Render each semester
+            semesterOrder.forEach(semester => {
+                if (!subjectsBySemester[semester]) return;
+
+                const semesterDiv = document.createElement('div');
+                semesterDiv.className = 'semester';
+                
+                const semesterNumber = semesterOrder.indexOf(semester);
+                const semesterIcon = semesterNumber === 0 ? 'N' : semesterNumber;
+                
+                semesterDiv.innerHTML = `
+                    <h2>
+                        <div class="semester-icon">${semesterIcon}</div>
+                        ${semester}
+                    </h2>
+                    <div class="subjects" id="subjects-${semester}"></div>
+                `;
+                
+                container.appendChild(semesterDiv);
+
+                const subjectsContainer = document.getElementById(`subjects-${semester}`);
+                
+                subjectsBySemester[semester].forEach(subject => {
+                    const status = getSubjectStatus(subject);
+                    const subjectDiv = document.createElement('div');
+                    subjectDiv.className = `subject ${status}`;
+                    subjectDiv.onclick = () => toggleSubject(subject.id);
+                    
+                    subjectDiv.innerHTML = `
+                        <div class="subject-code">${subject.code}</div>
+                        <div class="subject-name">${subject.name}</div>
+                        <div class="subject-credits">${subject.credits} créditos</div>
+                        ${subject.grade ? `<div class="subject-grade">${subject.grade}</div>` : ''}
+                    `;
+                    
+                    subjectsContainer.appendChild(subjectDiv);
+                });
+            });
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const totalSubjects = Object.keys(subjects).length;
+            const completedSubjects = Object.values(subjects).filter(s => s.completed).length;
+            const availableSubjects = Object.values(subjects).filter(s => !s.completed && checkPrerequisites(s)).length;
+            const totalCredits = Object.values(subjects).filter(s => s.completed).reduce((sum, s) => sum + s.credits, 0);
+            
+            const progressPercentage = Math.round((completedSubjects / totalSubjects) * 100);
+            
+            document.getElementById('completed-count').textContent = completedSubjects;
+            document.getElementById('available-count').textContent = availableSubjects;
+            document.getElementById('total-count').textContent = totalSubjects;
+            document.getElementById('credits-count').textContent = totalCredits;
+            
+            const progressFill = document.getElementById('progress-fill');
+            progressFill.style.width = `${progressPercentage}%`;
+            progressFill.textContent = `${progressPercentage}%`;
+        }
+
+        // Initialize
+        renderMalla();
+    </script>
+</body>
+</html>
