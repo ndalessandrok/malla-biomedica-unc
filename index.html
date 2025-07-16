@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malla Curricular - Ingeniería Biomédica UNC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1e40af;
+            --secondary-color: #3b82f6;
+            --success-color: #9333ea;
+            --warning-color: #7dd3fc;
+            --danger-color: #f9a8d4;
+            --bg-color: #ffffff;
+            --surface-color: #f8fafc;
+            --text-color: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #3b82f6;
+            --secondary-color: #60a5fa;
+            --success-color: #a855f7;
+            --warning-color: #67e8f9;
+            --danger-color: #fbb6ce;
+            --bg-color: #111827;
+            --surface-color: #1f2937;
+            --text-color: #f9fafb;
+            --text-muted: #9ca3af;
+            --border-color: #374151;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+            align-items: center;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .theme-toggle {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .curriculum-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .semester {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .semester h3 {
+            color: var(--primary-color);
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px;
+        }
+
+        .subject {
+            background-color: var(--bg-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .subject:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .subject.completed {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .subject.available {
+            border-color: var(--warning-color);
+            background-color: rgba(125, 211, 252, 0.2);
+            color: var(--text-color);
+        }
+
+        .subject.blocked {
+            background-color: rgba(249, 168, 212, 0.2);
+            border-color: var(--danger-color);
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .subject-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .subject-code {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .subject.completed .subject-code {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .subject-credits {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .subject.completed .subject-credits {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .grade-input {
+            width: 60px;
+            padding: 4px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .subject.completed .grade-input {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 16px;
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+
+        .legend-color.completed {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .legend-color.available {
+            background-color: rgba(125, 211, 252, 0.2);
+            border-color: var(--warning-color);
+        }
+
+        .legend-color.blocked {
+            background-color: rgba(249, 168, 212, 0.2);
+            border-color: var(--danger-color);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--success-color);
+            transition: width 0.3s ease;
+        }
+
+        .enabled-subjects {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .enabled-subjects h4 {
+            color: var(--primary-color);
+            margin-bottom: 12px;
+        }
+
+        .enabled-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .enabled-item {
+            background-color: var(--warning-color);
+            color: var(--text-color);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(125, 211, 252, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .curriculum-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                justify-content: center;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Malla Curricular - Ingeniería Biomédica</h1>
+            <p>Universidad Nacional de Córdoba - Nadine D'Alessandro</p>
+        </div>
+
+        <div class="controls">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="completedCount">0</div>
+                    <div class="stat-label">Completadas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalCount">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="progressPercent">0%</div>
+                    <div class="stat-label">Progreso</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="averageGrade">0.00</div>
+                    <div class="stat-label">Promedio</div>
+                </div>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙 Cambiar Tema</button>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color completed"></div>
+                <span>Completada</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color available"></div>
+                <span>Disponible</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color blocked"></div>
+                <span>Bloqueada</span>
+            </div>
+        </div>
+
+        <div class="curriculum-grid" id="curriculumGrid"></div>
+
+        <div class="enabled-subjects" id="enabledSubjects" style="display: none;">
+            <h4>Materias habilitadas para cursar:</h4>
+            <div class="enabled-list" id="enabledList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Datos del plan de estudios
+        const curriculumData = {
+            "Nivelación": [
+                { code: "10-04050", name: "Ambientación Universitaria", credits: 1, status: "completed", grade: 10 },
+                { code: "10-04051", name: "Matemática", credits: 3, status: "completed", grade: 10 },
+                { code: "10-04052", name: "Física y Química", credits: 3, status: "completed", grade: 10 }
+            ],
+            "1° Cuatrimestre": [
+                { code: "10-04053", name: "Análisis Matemático 1", credits: 7, status: "completed", grade: 9 },
+                { code: "10-04057", name: "Química", credits: 5, status: "completed", grade: 7 },
+                { code: "10-04058", name: "Taller y Laboratorio", credits: 6, status: "completed", grade: 6.5 }
+            ],
+            "2° Cuatrimestre": [
+                { code: "10-04059", name: "Álgebra Lineal", credits: 7, status: "completed", grade: 7, prerequisites: ["10-04053"] },
+                { code: "10-04060", name: "Física 1", credits: 7, status: "completed", grade: 8, prerequisites: ["10-04053", "10-04052"] },
+                { code: "10-09200", name: "Química Orgánica y Biológica", credits: 5, status: "completed", grade: 7, prerequisites: ["10-04057"] },
+                { code: "10-04055", name: "Sistemas de Representación", credits: 7, status: "available", prerequisites: ["10-04058"] }
+            ],
+            "3° Cuatrimestre": [
+                { code: "10-04063", name: "Análisis Matemático 2", credits: 7, status: "completed", grade: 5, prerequisites: ["10-04059"] },
+                { code: "10-09201", name: "Anatomía para Ingenieros", credits: 4, status: "available", prerequisites: ["10-09200"] },
+                { code: "10-09202", name: "Estática y Resistencia de los Materiales", credits: 6, status: "available", prerequisites: ["10-04060", "10-04059"] },
+                { code: "10-04067", name: "Física 2", credits: 7, status: "available", prerequisites: ["10-04060", "10-04059"] },
+                { code: "10-04066", name: "Módulo de Inglés", credits: 3, status: "completed", grade: 8 }
+            ],
+            "4° Cuatrimestre": [
+                { code: "10-04070", name: "Análisis Matemático 3", credits: 7, status: "completed", grade: 7, prerequisites: ["10-04063"] },
+                { code: "10-04074", name: "Electrónica", credits: 6, status: "available", prerequisites: ["10-04067"] },
+                { code: "10-09203", name: "Histología para Ingenieros", credits: 4, status: "completed", grade: 5, prerequisites: ["10-09201"] },
+                { code: "10-04061", name: "Informática y Cálculo Numérico", credits: 8, status: "completed", grade: 8, prerequisites: ["10-04063"] },
+                { code: "10-04062", name: "Probabilidad y Estadística", credits: 5, status: "available", prerequisites: ["10-04063"] }
+            ],
+            "5° Cuatrimestre": [
+                { code: "10-04068", name: "Electrónica Digital 1", credits: 8, status: "blocked", prerequisites: ["10-04074"] },
+                { code: "10-09204", name: "Electrotecnia General y Máquinas Eléctricas", credits: 8, status: "blocked", prerequisites: ["10-04067"] },
+                { code: "10-09205", name: "Fisiología Humana", credits: 4, status: "blocked", prerequisites: ["10-09203"] },
+                { code: "10-04076", name: "Señales y Sistemas", credits: 8, status: "blocked", prerequisites: ["10-04070", "10-04061"] }
+            ],
+            "6° Cuatrimestre": [
+                { code: "10-09206", name: "Biomateriales", credits: 6, status: "blocked", prerequisites: ["10-09202"] },
+                { code: "10-04071", name: "Electrónica Digital 2", credits: 8, status: "blocked", prerequisites: ["10-04068"] },
+                { code: "10-09207", name: "Física Biomédica", credits: 4, status: "blocked", prerequisites: ["10-04067"] },
+                { code: "10-04064", name: "Ingeniería Económica y Legal", credits: 6, status: "blocked", prerequisites: ["10-04062"] },
+                { code: "10-09208", name: "Teoría de Redes y Control", credits: 6, status: "blocked", prerequisites: ["10-04076"] }
+            ],
+            "7° Cuatrimestre": [
+                { code: "10-09209", name: "Electrónica Analógica", credits: 6, status: "blocked", prerequisites: ["10-04074"] },
+                { code: "10-09210", name: "Fisiopatología", credits: 4, status: "blocked", prerequisites: ["10-09205"] },
+                { code: "10-09211", name: "Instalaciones Hospitalarias", credits: 10, status: "blocked", prerequisites: ["10-09204"] },
+                { code: "10-09212", name: "Procesamiento de Señales", credits: 6, status: "blocked", prerequisites: ["10-04076"] },
+                { code: "10-09213", name: "Transductores y Sensores", credits: 8, status: "blocked", prerequisites: ["10-09209"] }
+            ],
+            "8° Cuatrimestre": [
+                { code: "10-09214", name: "Biomecánica", credits: 6, status: "blocked", prerequisites: ["10-09202", "10-09205"] },
+                { code: "10-09215", name: "Imágenes en Medicina", credits: 7, status: "blocked", prerequisites: ["10-09212"] },
+                { code: "10-09216", name: "Instrumentación Biomédica", credits: 10, status: "blocked", prerequisites: ["10-09213"] },
+                { code: "10-09217", name: "Práctica Profesional Supervisada", credits: 10, status: "blocked", prerequisites: ["10-09211"] }
+            ],
+            "9° Cuatrimestre": [
+                { code: "10-09218", name: "Ingeniería en Rehabilitación", credits: 7, status: "blocked", prerequisites: ["10-09214"] },
+                { code: "10-09219", name: "Ingeniería Hospitalaria", credits: 7, status: "blocked", prerequisites: ["10-09211"] },
+                { code: "10-09220", name: "Modelos y Simulaciones", credits: 7, status: "blocked", prerequisites: ["10-04061", "10-09205"] },
+                { code: "10-09222", name: "Radiaciones Ionizantes en Medicina", credits: 7, status: "blocked", prerequisites: ["10-09207"] }
+            ],
+            "10° Cuatrimestre": [
+                { code: "10-04078", name: "Higiene y Seguridad", credits: 7, status: "blocked", prerequisites: ["10-09217"] },
+                { code: "10-09223", name: "Seguridad y Normalización Biomédica", credits: 7, status: "blocked", prerequisites: ["10-09216"] },
+                { code: "10-09225", name: "Proyecto Integrador", credits: 13, status: "blocked", prerequisites: ["10-09218", "10-09219", "10-09220", "10-09222"] }
+            ]
+        };
+
+        // Estado de la aplicación
+        let subjects = {};
+        let currentTheme = localStorage.getItem('theme') || 'light';
+
+        // Inicializar la aplicación
+        function init() {
+            // Convertir datos del curriculum a formato de objeto
+            Object.keys(curriculumData).forEach(semester => {
+                curriculumData[semester].forEach(subject => {
+                    subjects[subject.code] = {
+                        ...subject,
+                        semester: semester,
+                        prerequisites: subject.prerequisites || []
+                    };
+                });
+            });
+
+            // Aplicar tema guardado
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            
+            // Renderizar la malla curricular
+            renderCurriculum();
+            updateStats();
+            updateSubjectStates();
+        }
+
+        // Renderizar la malla curricular
+        function renderCurriculum() {
+            const grid = document.getElementById('curriculumGrid');
+            grid.innerHTML = '';
+
+            Object.keys(curriculumData).forEach(semester => {
+                const semesterDiv = document.createElement('div');
+                semesterDiv.className = 'semester';
+                
+                const semesterTitle = document.createElement('h3');
+                semesterTitle.textContent = semester;
+                semesterDiv.appendChild(semesterTitle);
+
+                curriculumData[semester].forEach(subject => {
+                    const subjectDiv = document.createElement('div');
+                    subjectDiv.className = `subject ${subject.status}`;
+                    subjectDiv.onclick = () => toggleSubject(subject.code);
+
+                    const subjectName = document.createElement('div');
+                    subjectName.className = 'subject-name';
+                    subjectName.textContent = subject.name;
+
+                    const subjectCode = document.createElement('div');
+                    subjectCode.className = 'subject-code';
+                    subjectCode.textContent = subject.code;
+
+                    const subjectCredits = document.createElement('div');
+                    subjectCredits.className = 'subject-credits';
+                    subjectCredits.textContent = `${subject.credits} créditos`;
+
+                    subjectDiv.appendChild(subjectName);
+                    subjectDiv.appendChild(subjectCode);
+                    subjectDiv.appendChild(subjectCredits);
+
+                    // Agregar input para la nota si está completada
+                    if (subject.status === 'completed') {
+                        const gradeInput = document.createElement('input');
+                        gradeInput.type = 'number';
+                        gradeInput.className = 'grade-input';
+                        gradeInput.placeholder = 'Nota';
+                        gradeInput.min = '1';
+                        gradeInput.max = '10';
+                        gradeInput.step = '0.1';
+                        gradeInput.value = subject.grade || '';
+                        gradeInput.onclick = (e) => e.stopPropagation();
+                        gradeInput.onchange = (e) => updateGrade(subject.code, parseFloat(e.target.value));
+                        subjectDiv.appendChild(gradeInput);
+                    }
+
+                    semesterDiv.appendChild(subjectDiv);
+                });
+
+                grid.appendChild(semesterDiv);
+            });
+        }
+
+        // Alternar estado de una materia
+        function toggleSubject(code) {
+            const subject = subjects[code];
+            if (!subject) return;
+
+            if (subject.status === 'blocked') return;
+
+            if (subject.status === 'completed') {
+                subject.status = 'available';
+                delete subject.grade;
+            } else {
+                subject.status = 'completed';
+                subject.grade = 7; // Nota por defecto
+            }
+
+            updateSubjectStates();
+            renderCurriculum();
+            updateStats();
+            saveProgress();
+        }
+
+        // Actualizar nota de una materia
+        function updateGrade(code, grade) {
+            const subject = subjects[code];
+            if (subject && subject.status === 'completed') {
+                subject.grade = grade;
+                updateStats();
+                saveProgress();
+            }
+        }
+
+        // Actualizar estados de las materias
+        function updateSubjectStates() {
+            Object.keys(subjects).forEach(code => {
+                const subject = subjects[code];
+                if (subject.status === 'completed') return;
+
+                const canTake = subject.prerequisites.every(prereq => 
+                    subjects[prereq] && subjects[prereq].status === 'completed'
+                );
+
+                subject.status = canTake ? 'available' : 'blocked';
+            });
+
+            // Actualizar datos del curriculum
+            Object.keys(curriculumData).forEach(semester => {
+                curriculumData[semester].forEach(subject => {
+                    const updatedSubject = subjects[subject.code];
+                    if (updatedSubject) {
+                        subject.status = updatedSubject.status;
+                        subject.grade = updatedSubject.grade;
+                    }
+                });
+            });
+
+            showEnabledSubjects();
+        }
+
+        // Mostrar materias habilitadas
+        function showEnabledSubjects() {
+            const availableSubjects = Object.values(subjects).filter(s => s.status === 'available');
+            const container = document.getElementById('enabledSubjects');
+            const list = document.getElementById('enabledList');
+
+            if (availableSubjects.length > 0) {
+                container.style.display = 'block';
+                list.innerHTML = '';
+                availableSubjects.forEach(subject => {
+                    const item = document.createElement('div');
+                    item.className = 'enabled-item';
+                    item.textContent = subject.name;
+                    list.appendChild(item);
+                });
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // Actualizar estadísticas
+        function updateStats() {
+            const allSubjects = Object.values(subjects);
+            const completedSubjects = allSubjects.filter(s => s.status === 'completed');
+            const totalSubjects = allSubjects.length;
+            const progressPercent = Math.round((completedSubjects.length / totalSubjects) * 100);
+
+            // Calcular promedio
+            const gradesSum = completedSubjects
+                .filter(s => s.grade && s.grade > 0)
+                .reduce((sum, s) => sum + s.grade, 0);
+            const gradesCount = completedSubjects.filter(s => s.grade && s.grade > 0).length;
+            const average = gradesCount > 0 ? (gradesSum / gradesCount).toFixed(2) : '0.00';
+
+            document.getElementById('completedCount').textContent = completedSubjects.length;
+            document.getElementById('totalCount').textContent = totalSubjects;
+            document.getElementById('progressPercent').textContent = `${progressPercent}%`;
+            document.getElementById('averageGrade').textContent = average;
+        }
+
+        // Cambiar tema
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+        }
+
+        // Guardar progreso
+        function saveProgress() {
+            const progress = {};
+            Object.keys(subjects).forEach(code => {
+                const subject = subjects[code];
+                if (subject.status === 'completed') {
+                    progress[code] = {
+                        status: subject.status,
+                        grade: subject.grade
+                    };
+                }
+            });
+            localStorage.setItem('curriculumProgress', JSON.stringify(progress));
+        }
+
+        // Cargar progreso
+        function loadProgress() {
+            const saved = localStorage.getItem('curriculumProgress');
+            if (saved) {
+                const progress = JSON.parse(saved);
+                Object.keys(progress).forEach(code => {
+                    if (subjects[code]) {
+                        subjects[code].status = progress[code].status;
+                        subjects[code].grade = progress[code].grade;
+                    }
+                });
+            }
+        }
+
+        // Inicializar al cargar la página
+        window.onload = function() {
+            init();
+            loadProgress();
+            updateSubjectStates();
+            renderCurriculum();
+            updateStats();
+        };
+    </script>
+</body>
+</html>
